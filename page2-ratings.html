@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VA Disability Ratings</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-deep: #0B1F3F;
+            --navy-medium: #1B3A5F;
+            --gold: #C9A961;
+            --gold-bright: #E5C878;
+            --cream: #F4F1E8;
+            --white: #FFFFFF;
+            --green-confirmed: #48A14D;
+            --gray-text: #5A6A7A;
+            --shadow-soft: rgba(11, 31, 63, 0.08);
+            --shadow-medium: rgba(11, 31, 63, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #F4F1E8 0%, #E8E3D6 100%);
+            color: var(--navy-deep);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--navy-deep);
+            color: var(--cream);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.75rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .summary-box {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-soft);
+            margin-bottom: 2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--navy-deep);
+        }
+
+        .summary-label {
+            color: var(--gray-text);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .rating-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow-soft);
+            margin-bottom: 1rem;
+        }
+
+        .rating-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .rating-percentage {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--navy-deep);
+        }
+
+        .static-badge {
+            background: var(--green-confirmed);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .condition-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--navy-deep);
+            margin-bottom: 0.5rem;
+        }
+
+        .condition-details {
+            color: var(--gray-text);
+            font-size: 0.9rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--navy-deep);
+            color: var(--gold-bright);
+        }
+
+        .btn-primary:hover {
+            background: var(--navy-medium);
+        }
+
+        .btn-secondary {
+            background: var(--cream);
+            color: var(--navy-deep);
+        }
+
+        .btn-secondary:hover {
+            background: #ded9c8;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>VA Disability Ratings</h1>
+    </header>
+
+    <div class="container">
+        <div class="summary-box">
+            <h2>Your Ratings Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value" id="combinedRating">--</div>
+                    <div class="summary-label">Combined Rating</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="totalConditions">--</div>
+                    <div class="summary-label">Total Conditions</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="staticConditions">--</div>
+                    <div class="summary-label">Static Conditions</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ratingsContainer"></div>
+
+        <div class="nav-buttons">
+            <a href="index.html" class="btn btn-secondary">← Back</a>
+            <a href="page3-claims.html" class="btn btn-primary">View Claims →</a>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const ratingsData = localStorage.getItem('va_ratings_data');
+            
+            if (!ratingsData) {
+                document.getElementById('ratingsContainer').innerHTML = `
+                    <div class="rating-card">
+                        <p style="text-align:center; color: var(--gray-text);">
+                            No ratings data found. Please load your data first.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const data = JSON.parse(ratingsData);
+                displayRatings(data);
+            } catch (e) {
+                console.error('Error parsing ratings data:', e);
+            }
+        });
+
+        function displayRatings(data) {
+            const ratings = data?.data?.attributes?.individual_ratings || [];
+            const combinedRating = data?.data?.attributes?.combined_disability_rating || 0;
+
+            // Update summary
+            document.getElementById('combinedRating').textContent = combinedRating + '%';
+            document.getElementById('totalConditions').textContent = ratings.length;
+            document.getElementById('staticConditions').textContent = 
+                ratings.filter(r => r.static_ind === true).length;
+
+            // Display individual ratings
+            const container = document.getElementById('ratingsContainer');
+            
+            if (ratings.length === 0) {
+                container.innerHTML = `
+                    <div class="rating-card">
+                        <p style="text-align:center; color: var(--gray-text);">
+                            No individual ratings found.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = ratings.map(rating => `
+                <div class="rating-card">
+                    <div class="rating-header">
+                        <div class="rating-percentage">${rating.rating_percentage || 0}%</div>
+                        ${rating.static_ind ? '<div class="static-badge">STATIC</div>' : ''}
+                    </div>
+                    <div class="condition-name">${rating.diagnostic_text || 'Unknown Condition'}</div>
+                    <div class="condition-details">
+                        ${rating.decision ? `Decision: ${rating.decision}<br>` : ''}
+                        ${rating.effective_date ? `Effective Date: ${new Date(rating.effective_date).toLocaleDateString()}` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

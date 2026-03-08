@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VA Claims</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-deep: #0B1F3F;
+            --navy-medium: #1B3A5F;
+            --gold: #C9A961;
+            --gold-bright: #E5C878;
+            --cream: #F4F1E8;
+            --white: #FFFFFF;
+            --green-confirmed: #48A14D;
+            --orange-pending: #E67E22;
+            --blue-info: #2E7DAF;
+            --gray-text: #5A6A7A;
+            --shadow-soft: rgba(11, 31, 63, 0.08);
+            --shadow-medium: rgba(11, 31, 63, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #F4F1E8 0%, #E8E3D6 100%);
+            color: var(--navy-deep);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--navy-deep);
+            color: var(--cream);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.75rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .claim-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow-soft);
+            margin-bottom: 1.5rem;
+        }
+
+        .claim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .claim-type {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--navy-deep);
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status-gathering {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .status-complete {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .claim-details {
+            color: var(--gray-text);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            background: var(--cream);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            background: var(--blue-info);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--gray-text);
+            text-align: center;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--navy-deep);
+            color: var(--gold-bright);
+        }
+
+        .btn-primary:hover {
+            background: var(--navy-medium);
+        }
+
+        .btn-secondary {
+            background: var(--cream);
+            color: var(--navy-deep);
+        }
+
+        .btn-secondary:hover {
+            background: #ded9c8;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>VA Claims</h1>
+    </header>
+
+    <div class="container">
+        <div id="claimsContainer"></div>
+
+        <div class="nav-buttons">
+            <a href="page2-ratings.html" class="btn btn-secondary">← Back to Ratings</a>
+            <a href="page4-appeals.html" class="btn btn-primary">View Appeals →</a>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const claimsData = localStorage.getItem('va_claims_data');
+            
+            if (!claimsData) {
+                document.getElementById('claimsContainer').innerHTML = `
+                    <div class="claim-card">
+                        <p style="text-align:center; color: var(--gray-text);">
+                            No claims data found. Please load your data first.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const data = JSON.parse(claimsData);
+                displayClaims(data);
+            } catch (e) {
+                console.error('Error parsing claims data:', e);
+            }
+        });
+
+        function displayClaims(data) {
+            const claims = data?.data || [];
+            const container = document.getElementById('claimsContainer');
+
+            if (claims.length === 0) {
+                container.innerHTML = `
+                    <div class="claim-card">
+                        <p style="text-align:center; color: var(--gray-text);">
+                            No active claims found.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = claims.map(claim => {
+                const attrs = claim.attributes || {};
+                const phase = attrs.phase || 0;
+                const maxPhase = 8;
+                const progress = (phase / maxPhase) * 100;
+
+                return `
+                    <div class="claim-card">
+                        <div class="claim-header">
+                            <div class="claim-type">${attrs.claim_type || 'Unknown Type'}</div>
+                            <div class="status-badge status-${getStatusClass(attrs.status)}">
+                                ${attrs.status || 'Unknown Status'}
+                            </div>
+                        </div>
+                        <div class="claim-details">
+                            Filed: ${attrs.claim_date ? new Date(attrs.claim_date).toLocaleDateString() : 'Unknown'}
+                            ${attrs.decision_letter_sent ? '<br>Decision Letter Sent: Yes' : ''}
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="progress-text">Phase ${phase} of ${maxPhase}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusClass(status) {
+            const statusLower = (status || '').toLowerCase();
+            if (statusLower.includes('complete')) return 'complete';
+            if (statusLower.includes('gathering') || statusLower.includes('review')) return 'gathering';
+            return 'pending';
+        }
+    </script>
+</body>
+</html>

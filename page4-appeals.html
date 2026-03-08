@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VA Appeals</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-deep: #0B1F3F;
+            --navy-medium: #1B3A5F;
+            --gold: #C9A961;
+            --gold-bright: #E5C878;
+            --cream: #F4F1E8;
+            --white: #FFFFFF;
+            --blue-info: #2E7DAF;
+            --gray-text: #5A6A7A;
+            --shadow-soft: rgba(11, 31, 63, 0.08);
+            --shadow-medium: rgba(11, 31, 63, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #F4F1E8 0%, #E8E3D6 100%);
+            color: var(--navy-deep);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--navy-deep);
+            color: var(--cream);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.75rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .appeal-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow-soft);
+            margin-bottom: 1.5rem;
+        }
+
+        .appeal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .appeal-type {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--navy-deep);
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .appeal-description {
+            color: var(--navy-deep);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .appeal-details {
+            color: var(--gray-text);
+            font-size: 0.9rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--navy-deep);
+            color: var(--gold-bright);
+        }
+
+        .btn-primary:hover {
+            background: var(--navy-medium);
+        }
+
+        .btn-secondary {
+            background: var(--cream);
+            color: var(--navy-deep);
+        }
+
+        .btn-secondary:hover {
+            background: #ded9c8;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>VA Appeals</h1>
+    </header>
+
+    <div class="container">
+        <div id="appealsContainer"></div>
+
+        <div class="nav-buttons">
+            <a href="page3-claims.html" class="btn btn-secondary">← Back to Claims</a>
+            <a href="index.html" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const appealsData = localStorage.getItem('va_appeals_data');
+            
+            if (!appealsData) {
+                document.getElementById('appealsContainer').innerHTML = `
+                    <div class="appeal-card">
+                        <p style="text-align:center; color: var(--gray-text);">
+                            No appeals data found. Please load your data first.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const data = JSON.parse(appealsData);
+                displayAppeals(data);
+            } catch (e) {
+                console.error('Error parsing appeals data:', e);
+            }
+        });
+
+        function displayAppeals(data) {
+            const appeals = data?.data || [];
+            const container = document.getElementById('appealsContainer');
+
+            if (appeals.length === 0) {
+                container.innerHTML = `
+                    <div class="appeal-card">
+                        <p style="text-align:center; color: var(--gray-text);">
+                            No active appeals found.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = appeals.map(appeal => {
+                const attrs = appeal.attributes || {};
+
+                return `
+                    <div class="appeal-card">
+                        <div class="appeal-header">
+                            <div class="appeal-type">${attrs.type || 'Unknown Appeal Type'}</div>
+                            <div class="status-badge">${attrs.status || 'Unknown Status'}</div>
+                        </div>
+                        ${attrs.description ? `
+                            <div class="appeal-description">${attrs.description}</div>
+                        ` : ''}
+                        <div class="appeal-details">
+                            ${attrs.updated ? `Last Updated: ${new Date(attrs.updated).toLocaleDateString()}` : ''}
+                            ${attrs.programArea ? `<br>Program Area: ${attrs.programArea}` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

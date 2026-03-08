@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VA Benefits Tracker - Load Data</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-deep: #0B1F3F;
+            --navy-medium: #1B3A5F;
+            --gold: #C9A961;
+            --gold-bright: #E5C878;
+            --cream: #F4F1E8;
+            --white: #FFFFFF;
+            --red-alert: #C1666B;
+            --green-confirmed: #48A14D;
+            --gray-text: #5A6A7A;
+            --shadow-soft: rgba(11, 31, 63, 0.08);
+            --shadow-medium: rgba(11, 31, 63, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #F4F1E8 0%, #E8E3D6 100%);
+            color: var(--navy-deep);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--navy-deep);
+            color: var(--cream);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 50%, var(--gold) 100%);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 3rem;
+            box-shadow: 0 4px 12px var(--shadow-soft);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            color: var(--navy-deep);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--gray-text);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        .success {
+            background: #E8F5E9;
+            border-left: 4px solid var(--green-confirmed);
+            padding: 1.5rem;
+            border-radius: 4px;
+            color: #2E7D32;
+            margin: 2rem 0;
+        }
+
+        .error {
+            background: #FFF5F5;
+            border-left: 4px solid var(--red-alert);
+            padding: 1.5rem;
+            border-radius: 4px;
+            color: #7A3B3F;
+            margin: 2rem 0;
+        }
+
+        .nav-buttons {
+            margin-top: 3rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--navy-deep);
+            color: var(--gold-bright);
+        }
+
+        .btn-secondary:hover {
+            background: var(--navy-medium);
+            transform: translateY(-2px);
+        }
+
+        .info-box {
+            background: #E3F2FD;
+            border-left: 4px solid #2E7DAF;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: var(--navy-deep);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p {
+            color: var(--gray-text);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h1 style="font-family: 'DM Serif Display', serif; font-size: 1.75rem; font-weight: 400;">
+                VA Benefits Tracker
+            </h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h1>Your VA Benefits Data</h1>
+            <p class="subtitle">View your disability ratings, claims, and appeals</p>
+
+            <div id="statusMessage"></div>
+
+            <div class="nav-buttons" id="navButtons" style="display: none;">
+                <button class="btn btn-secondary" onclick="window.location.href='page2-ratings.html'">
+                    View Disability Ratings →
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='page3-claims.html'">
+                    View Claims →
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='page4-appeals.html'">
+                    View Appeals →
+                </button>
+            </div>
+
+            <div id="noDataMessage" style="display: none;">
+                <div class="info-box">
+                    <h3>How to Load Your Data</h3>
+                    <p>
+                        1. Make sure you have the Clear Path VA Chrome Extension installed<br>
+                        2. Log into VA.gov in another tab<br>
+                        3. Click the Clear Path VA extension icon in Chrome<br>
+                        4. Click "Load My VA Data"<br>
+                        5. You'll be redirected back here with your data loaded
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if data exists when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            checkForData();
+        });
+
+        function checkForData() {
+            const statusMessage = document.getElementById('statusMessage');
+            const navButtons = document.getElementById('navButtons');
+            const noDataMessage = document.getElementById('noDataMessage');
+
+            // Try to get data from URL parameter first
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+
+            if (dataParam) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(dataParam));
+                    
+                    // Store in localStorage for other pages to read
+                    if (data.ratings) {
+                        localStorage.setItem('va_ratings_data', JSON.stringify(data.ratings));
+                    }
+                    if (data.claims) {
+                        localStorage.setItem('va_claims_data', JSON.stringify(data.claims));
+                    }
+                    if (data.appeals) {
+                        localStorage.setItem('va_appeals_data', JSON.stringify(data.appeals));
+                    }
+
+                    showSuccess(data.timestamp);
+                    return;
+                } catch (e) {
+                    console.error('Error parsing URL data:', e);
+                }
+            }
+
+            // Fallback: check localStorage
+            checkLocalStorage();
+        }
+
+        function checkLocalStorage() {
+            const statusMessage = document.getElementById('statusMessage');
+            const navButtons = document.getElementById('navButtons');
+            const noDataMessage = document.getElementById('noDataMessage');
+
+            const ratings = localStorage.getItem('va_ratings_data');
+            const claims = localStorage.getItem('va_claims_data');
+            const appeals = localStorage.getItem('va_appeals_data');
+
+            if (ratings || claims || appeals) {
+                showSuccess();
+            } else {
+                showNoData();
+            }
+        }
+
+        function showSuccess(lastUpdated) {
+            const statusMessage = document.getElementById('statusMessage');
+            const navButtons = document.getElementById('navButtons');
+            const noDataMessage = document.getElementById('noDataMessage');
+
+            let updateText = '';
+            if (lastUpdated) {
+                const date = new Date(lastUpdated);
+                updateText = `<br><small>Last updated: ${date.toLocaleString()}</small>`;
+            }
+
+            statusMessage.innerHTML = `
+                <div class="success">
+                    <strong>✓ Data Loaded Successfully!</strong>
+                    <br><br>Click the buttons below to view your VA benefits data
+                    ${updateText}
+                </div>
+            `;
+            navButtons.style.display = 'flex';
+            noDataMessage.style.display = 'none';
+        }
+
+        function showNoData() {
+            const statusMessage = document.getElementById('statusMessage');
+            const navButtons = document.getElementById('navButtons');
+            const noDataMessage = document.getElementById('noDataMessage');
+
+            statusMessage.innerHTML = `
+                <div class="error">
+                    <strong>❌ No Data Found</strong>
+                    <br><br>Please use the Chrome extension to load your VA data first.
+                </div>
+            `;
+            navButtons.style.display = 'none';
+            noDataMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
