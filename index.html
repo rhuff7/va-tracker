@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VA Benefits Tracker - Load Data</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Clear Path VA - Benefits Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --navy-deep: #0B1F3F;
             --navy-medium: #1B3A5F;
+            --navy-light: #2D4A6F;
             --gold: #C9A961;
             --gold-bright: #E5C878;
+            --gold-dark: #A0884D;
             --cream: #F4F1E8;
             --white: #FFFFFF;
             --red-alert: #C1666B;
-            --green-confirmed: #48A14D;
+            --green-static: #48A14D;
+            --blue-info: #2E7DAF;
+            --orange-pending: #E67E22;
             --gray-text: #5A6A7A;
-            --shadow-soft: rgba(11, 31, 63, 0.08);
-            --shadow-medium: rgba(11, 31, 63, 0.15);
+            --gray-light: #E8E3D6;
+            --shadow: rgba(11, 31, 63, 0.12);
         }
 
         * {
@@ -27,261 +31,1131 @@
         }
 
         body {
-            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background: linear-gradient(135deg, #F4F1E8 0%, #E8E3D6 100%);
             color: var(--navy-deep);
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .header {
-            background: var(--navy-deep);
-            color: var(--cream);
-            padding: 1.5rem 2rem;
-            box-shadow: 0 2px 8px var(--shadow-medium);
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-medium) 100%);
+            padding: 2.5rem 0;
             position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(11, 31, 63, 0.2);
         }
 
-        .header::before {
+        header::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 50%, var(--gold) 100%);
+            height: 5px;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-bright), var(--gold), var(--gold-dark));
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 3rem auto;
-            padding: 0 2rem;
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
-        .card {
-            background: var(--white);
-            border-radius: 8px;
-            padding: 3rem;
-            box-shadow: 0 4px 12px var(--shadow-soft);
-            text-align: center;
+        header::after {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(201, 169, 97, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .emblem {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 2rem;
+            color: var(--navy-deep);
+            box-shadow: 0 8px 24px rgba(201, 169, 97, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            transform: rotate(-3deg);
+            transition: transform 0.3s ease;
+        }
+
+        .emblem:hover {
+            transform: rotate(0deg) scale(1.05);
         }
 
         h1 {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Playfair Display', serif;
             font-size: 2.5rem;
-            color: var(--navy-deep);
-            margin-bottom: 1rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: var(--white);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .subtitle {
-            color: var(--gray-text);
-            font-size: 1.1rem;
-            margin-bottom: 3rem;
+        .tagline {
+            color: var(--gold-bright);
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+            opacity: 0.9;
         }
 
-        .success {
-            background: #E8F5E9;
-            border-left: 4px solid var(--green-confirmed);
-            padding: 1.5rem;
-            border-radius: 4px;
-            color: #2E7D32;
-            margin: 2rem 0;
-        }
-
-        .error {
-            background: #FFF5F5;
-            border-left: 4px solid var(--red-alert);
-            padding: 1.5rem;
-            border-radius: 4px;
-            color: #7A3B3F;
-            margin: 2rem 0;
-        }
-
-        .nav-buttons {
-            margin-top: 3rem;
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 4px;
+        .header-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--gold);
+            color: var(--gold-bright);
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
-        .btn-secondary {
-            background: var(--navy-deep);
-            color: var(--gold-bright);
-        }
-
-        .btn-secondary:hover {
-            background: var(--navy-medium);
-            transform: translateY(-2px);
-        }
-
-        .info-box {
-            background: #E3F2FD;
-            border-left: 4px solid #2E7DAF;
-            padding: 1.5rem;
-            border-radius: 4px;
-            margin: 2rem 0;
-            text-align: left;
-        }
-
-        .info-box h3 {
+        .header-btn:hover {
+            background: var(--gold);
             color: var(--navy-deep);
-            margin-bottom: 0.5rem;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201, 169, 97, 0.3);
         }
 
-        .info-box p {
+        /* Container */
+        .container {
+            max-width: 1600px;
+            margin: -3rem auto 4rem;
+            padding: 0 3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(201, 169, 97, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--gold), var(--gold-bright));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(11, 31, 63, 0.18);
+        }
+
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .stat-icon::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .icon-rating { background: linear-gradient(135deg, #C8E6C9, #81C784); }
+        .icon-static { background: linear-gradient(135deg, #BBDEFB, #64B5F6); }
+        .icon-claims { background: linear-gradient(135deg, #FFE0B2, #FFB74D); }
+
+        .stat-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--navy-deep);
+            line-height: 1;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
             color: var(--gray-text);
             font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-sub {
+            color: var(--gray-text);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-panel {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 12px 48px var(--shadow);
+            overflow: hidden;
+            animation: slideUp 0.8s ease 0.2s both;
+        }
+
+        .tabs {
+            display: flex;
+            background: linear-gradient(to bottom, var(--gray-light), var(--cream));
+            padding: 1rem;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1.25rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            color: var(--gray-text);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            letter-spacing: 0.02em;
+            position: relative;
+        }
+
+        .tab::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 3px 3px 0 0;
+            transition: transform 0.3s ease;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--navy-deep);
+        }
+
+        .tab.active {
+            background: var(--white);
+            color: var(--navy-deep);
+            box-shadow: 0 4px 16px var(--shadow);
+        }
+
+        .tab.active::before {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .tab-pane {
+            padding: 3rem;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Banners */
+        .banner {
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2.5rem;
+            border-left: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .banner.success {
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            border-left-color: var(--green-static);
+        }
+
+        .banner.warning {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            border-left-color: var(--orange-pending);
+        }
+
+        .banner.info {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border-left-color: var(--blue-info);
+        }
+
+        .banner h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--navy-deep);
+        }
+
+        .banner p {
+            color: var(--navy-deep);
+            line-height: 1.7;
+            opacity: 0.9;
+        }
+
+        /* Condition Cards */
+        .conditions-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .condition-card {
+            background: linear-gradient(135deg, var(--white), var(--cream));
+            border: 2px solid var(--gray-light);
+            border-radius: 14px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .condition-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 8px 24px var(--shadow);
+            transform: translateX(4px);
+        }
+
+        .condition-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .condition-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--navy-deep);
+            flex: 1;
+        }
+
+        .rating-badge {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--navy-deep);
+            background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+            padding: 0.5rem 1.25rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(201, 169, 97, 0.3);
+            letter-spacing: -0.02em;
+        }
+
+        .condition-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-text);
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--navy-deep);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .badge-static {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            color: var(--blue-info);
+            border: 2px solid var(--blue-info);
+        }
+
+        .badge-nonstatic {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            color: var(--orange-pending);
+            border: 2px solid var(--orange-pending);
+        }
+
+        .badge-green {
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            color: var(--green-static);
+            border: 2px solid var(--green-static);
+        }
+
+        /* Progress Bar */
+        .progress-track {
+            background: var(--gray-light);
+            height: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-bright));
+            border-radius: 12px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(201, 169, 97, 0.4);
+        }
+
+        /* Insight Cards */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, var(--white), var(--cream));
+            border: 2px solid var(--gray-light);
+            border-radius: 16px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-card::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(201, 169, 97, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        .insight-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--navy-deep);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .insight-icon {
+            font-size: 2rem;
+        }
+
+        .insight-content {
+            color: var(--navy-deep);
+            line-height: 1.8;
+        }
+
+        .insight-list {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+
+        .insight-list li {
+            padding: 1rem;
+            background: rgba(201, 169, 97, 0.05);
+            border-left: 3px solid var(--gold);
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--gray-light);
+            border-top: 5px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 2px dotted var(--gold);
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            background: var(--navy-deep);
+            color: var(--cream);
+            text-align: left;
+            border-radius: 8px;
+            padding: 1rem;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            width: 300px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container { padding: 0 2rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .insights-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .stat-value { font-size: 2.5rem; }
+            .tab-pane { padding: 2rem 1.5rem; }
+            .header-content { flex-direction: column; gap: 1.5rem; }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <h1 style="font-family: 'DM Serif Display', serif; font-size: 1.75rem; font-weight: 400;">
-                VA Benefits Tracker
-            </h1>
+    <header>
+        <div class="header-content">
+            <div class="logo-area">
+                <div class="emblem">VA</div>
+                <div>
+                    <h1>Clear Path VA</h1>
+                    <div class="tagline">YOUR BENEFITS COMMAND CENTER</div>
+                </div>
+            </div>
+            <button class="header-btn" onclick="window.location.reload()">🔄 REFRESH DATA</button>
         </div>
     </header>
 
     <div class="container">
-        <div class="card">
-            <h1>Your VA Benefits Data</h1>
-            <p class="subtitle">View your disability ratings, claims, and appeals</p>
-
-            <div id="statusMessage"></div>
-
-            <div class="nav-buttons" id="navButtons" style="display: none;">
-                <button class="btn btn-secondary" onclick="window.location.href='page2-ratings.html'">
-                    View Disability Ratings →
-                </button>
-                <button class="btn btn-secondary" onclick="window.location.href='page3-claims.html'">
-                    View Claims →
-                </button>
-                <button class="btn btn-secondary" onclick="window.location.href='page4-appeals.html'">
-                    View Appeals →
-                </button>
+        <!-- Summary Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-rating">📊</div>
+                <div class="stat-value" id="combinedRating">--</div>
+                <div class="stat-label">Combined Rating</div>
+                <div class="stat-sub" id="ratingCount">Loading...</div>
             </div>
 
-            <div id="noDataMessage" style="display: none;">
-                <div class="info-box">
-                    <h3>How to Load Your Data</h3>
-                    <p>
-                        1. Make sure you have the Clear Path VA Chrome Extension installed<br>
-                        2. Log into VA.gov in another tab<br>
-                        3. Click the Clear Path VA extension icon in Chrome<br>
-                        4. Click "Load My VA Data"<br>
-                        5. You'll be redirected back here with your data loaded
-                    </p>
+            <div class="stat-card">
+                <div class="stat-icon icon-static">🔒</div>
+                <div class="stat-value" id="staticCount">--</div>
+                <div class="stat-label">Static Conditions</div>
+                <div class="stat-sub">Protected from reduction</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-claims">📋</div>
+                <div class="stat-value" id="claimsCount">--</div>
+                <div class="stat-label">Active Claims</div>
+                <div class="stat-sub" id="claimsStatus">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(event, 'ratings')">🎯 Disability Ratings</button>
+                <button class="tab" onclick="switchTab(event, 'claims')">📝 Claims</button>
+                <button class="tab" onclick="switchTab(event, 'appeals')">⚖️ Appeals</button>
+                <button class="tab" onclick="switchTab(event, 'insights')">💡 Clear Path Insights</button>
+            </div>
+
+            <!-- Ratings Tab -->
+            <div id="ratings" class="tab-pane active">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading your disability ratings...</p>
+                </div>
+            </div>
+
+            <!-- Claims Tab -->
+            <div id="claims" class="tab-pane">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading your claims...</p>
+                </div>
+            </div>
+
+            <!-- Appeals Tab -->
+            <div id="appeals" class="tab-pane">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading your appeals...</p>
+                </div>
+            </div>
+
+            <!-- Insights Tab -->
+            <div id="insights" class="tab-pane">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing your data...</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Check if data exists when page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            checkForData();
-        });
-
-        function checkForData() {
-            const statusMessage = document.getElementById('statusMessage');
-            const navButtons = document.getElementById('navButtons');
-            const noDataMessage = document.getElementById('noDataMessage');
-
-            // Try to get data from URL parameter first
-            const urlParams = new URLSearchParams(window.location.search);
-            const dataParam = urlParams.get('data');
-
-            if (dataParam) {
-                try {
-                    const data = JSON.parse(decodeURIComponent(dataParam));
-                    
-                    // Store in localStorage for other pages to read
-                    if (data.ratings) {
-                        localStorage.setItem('va_ratings_data', JSON.stringify(data.ratings));
-                    }
-                    if (data.claims) {
-                        localStorage.setItem('va_claims_data', JSON.stringify(data.claims));
-                    }
-                    if (data.appeals) {
-                        localStorage.setItem('va_appeals_data', JSON.stringify(data.appeals));
-                    }
-
-                    showSuccess(data.timestamp);
-                    return;
-                } catch (e) {
-                    console.error('Error parsing URL data:', e);
-                }
-            }
-
-            // Fallback: check localStorage
-            checkLocalStorage();
+        // Tab Switching
+        function switchTab(evt, tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            evt.currentTarget.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
         }
 
-        function checkLocalStorage() {
-            const statusMessage = document.getElementById('statusMessage');
-            const navButtons = document.getElementById('navButtons');
-            const noDataMessage = document.getElementById('noDataMessage');
+        // Load Data
+        window.addEventListener('DOMContentLoaded', loadAllData);
 
-            const ratings = localStorage.getItem('va_ratings_data');
-            const claims = localStorage.getItem('va_claims_data');
-            const appeals = localStorage.getItem('va_appeals_data');
+        function loadAllData() {
+            const ratings = getStoredData('va_ratings_data');
+            const claims = getStoredData('va_claims_data');
+            const appeals = getStoredData('va_appeals_data');
 
-            if (ratings || claims || appeals) {
-                showSuccess();
-            } else {
+            if (!ratings && !claims && !appeals) {
                 showNoData();
+                return;
+            }
+
+            if (ratings) {
+                renderSummary(ratings);
+                renderRatings(ratings);
+                renderInsights(ratings, claims);
+            }
+
+            if (claims) renderClaims(claims);
+            if (appeals) renderAppeals(appeals);
+        }
+
+        function getStoredData(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                console.error('Error parsing', key, e);
+                return null;
             }
         }
 
-        function showSuccess(lastUpdated) {
-            const statusMessage = document.getElementById('statusMessage');
-            const navButtons = document.getElementById('navButtons');
-            const noDataMessage = document.getElementById('noDataMessage');
+        function renderSummary(data) {
+            const combined = data?.data?.attributes?.combined_disability_rating || 0;
+            const ratings = data?.data?.attributes?.individual_ratings || [];
+            
+            // Only count service-connected conditions (exclude denied)
+            const serviceConnected = ratings.filter(r => r.decision === 'Service Connected');
+            const staticCount = serviceConnected.filter(r => r.static_ind).length;
 
-            let updateText = '';
-            if (lastUpdated) {
-                const date = new Date(lastUpdated);
-                updateText = `<br><small>Last updated: ${date.toLocaleString()}</small>`;
+            document.getElementById('combinedRating').textContent = combined + '%';
+            document.getElementById('staticCount').textContent = staticCount;
+            document.getElementById('ratingCount').textContent = `${serviceConnected.length} service-connected conditions`;
+
+            const claimsData = getStoredData('va_claims_data');
+            const claimsCount = claimsData?.data?.length || 0;
+            document.getElementById('claimsCount').textContent = claimsCount;
+            document.getElementById('claimsStatus').textContent = claimsCount > 0 ? 'In progress' : 'No active claims';
+        }
+
+        function renderRatings(data) {
+            const allRatings = data?.data?.attributes?.individual_ratings || [];
+            
+            // Filter to only service-connected conditions (exclude denied)
+            const ratings = allRatings.filter(r => r.decision === 'Service Connected');
+            
+            const combined = data?.data?.attributes?.combined_disability_rating || 0;
+            const staticCount = ratings.filter(r => r.static_ind).length;
+            const nonStaticCount = ratings.length - staticCount;
+
+            let html = '';
+
+            // Info Banner
+            if (nonStaticCount > 0) {
+                html += `
+                    <div class="banner warning">
+                        <h3>⚠️ ${nonStaticCount} Non-Static Condition${nonStaticCount > 1 ? 's' : ''}</h3>
+                        <p><strong>What this means:</strong> The VA can re-evaluate these service-connected conditions at any time. Static conditions are permanent and protected from reduction unless fraud is proven.</p>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="banner success">
+                        <h3>✅ All Your Service-Connected Conditions Are Static!</h3>
+                        <p><strong>Excellent news:</strong> All your service-connected ratings are marked permanent. The VA is unlikely to reduce these unless fraud is discovered.</p>
+                    </div>
+                `;
             }
 
-            statusMessage.innerHTML = `
-                <div class="success">
-                    <strong>✓ Data Loaded Successfully!</strong>
-                    <br><br>Click the buttons below to view your VA benefits data
-                    ${updateText}
+            // Education Box
+            html += `
+                <div class="banner info">
+                    <h3>📚 Understanding Your Ratings</h3>
+                    <p><strong>Combined Rating (${combined}%):</strong> This is NOT the sum of individual ratings. The VA uses a complex formula that calculates your "whole person" disability.</p>
+                    <p style="margin-top: 1rem;"><strong>Static vs. Non-Static:</strong> Static conditions are permanent. Non-static conditions can be re-evaluated, which means they could increase, decrease, or stay the same based on medical evidence.</p>
+                    <p style="margin-top: 1rem;"><strong>Note:</strong> Denied conditions are not shown here - only your service-connected ratings that contribute to your combined rating.</p>
                 </div>
             `;
-            navButtons.style.display = 'flex';
-            noDataMessage.style.display = 'none';
+
+            // Conditions
+            html += '<div class="conditions-grid">';
+            ratings.forEach(condition => {
+                const isStatic = condition.static_ind;
+                const effectiveDate = condition.effective_date ? new Date(condition.effective_date).toLocaleDateString() : 'N/A';
+                
+                html += `
+                    <div class="condition-card">
+                        <div class="condition-header">
+                            <div class="condition-name">${condition.diagnostic_text || 'Condition'}</div>
+                            <div class="rating-badge">${condition.rating_percentage}%</div>
+                        </div>
+                        
+                        <div>
+                            <span class="badge ${isStatic ? 'badge-static' : 'badge-nonstatic'}">
+                                ${isStatic ? '🔒 STATIC' : '⚠️ NON-STATIC'}
+                            </span>
+                        </div>
+
+                        <div class="condition-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Decision</div>
+                                <div class="detail-value">${condition.decision || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Effective Date</div>
+                                <div class="detail-value">${effectiveDate}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Status</div>
+                                <div class="detail-value">
+                                    <span class="tooltip">
+                                        ${isStatic ? 'Permanent' : 'Re-evaluable'}
+                                        <span class="tooltip-text">
+                                            ${isStatic 
+                                                ? 'This rating is permanent and protected from reduction unless fraud is proven.' 
+                                                : 'VA can schedule a re-evaluation exam. Your rating could change based on current medical evidence.'}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            document.getElementById('ratings').innerHTML = html;
+        }
+
+        function renderClaims(data) {
+            const claims = data?.data || [];
+
+            if (claims.length === 0) {
+                document.getElementById('claims').innerHTML = `
+                    <div class="banner info">
+                        <h3>No Active Claims</h3>
+                        <p>You currently have no claims in progress with the VA.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="banner info">
+                    <h3>📊 Understanding the Claims Process</h3>
+                    <p>VA claims go through 8 phases. Each phase has specific milestones. <strong>Before you file or appeal</strong>, make sure you have all required evidence. Filing without evidence just restarts the clock.</p>
+                </div>
+            `;
+
+            html += '<div class="conditions-grid">';
+            claims.forEach(claim => {
+                const attrs = claim.attributes || {};
+                const phase = attrs.phase || 1;
+                const progress = (phase / 8) * 100;
+                const status = attrs.status || 'Unknown';
+                const claimType = attrs.claim_type || 'N/A';
+                const claimDate = attrs.claim_date ? new Date(attrs.claim_date).toLocaleDateString() : 'N/A';
+
+                const phaseNames = [
+                    '1. Claim Received',
+                    '2. Initial Review',
+                    '3. Evidence Gathering',
+                    '4. Review of Evidence',
+                    '5. Preparation for Decision',
+                    '6. Pending Decision Approval',
+                    '7. Preparation for Notification',
+                    '8. Complete'
+                ];
+
+                html += `
+                    <div class="condition-card">
+                        <div class="condition-header">
+                            <div class="condition-name">${claimType}</div>
+                            <span class="badge badge-green">Phase ${phase} of 8</span>
+                        </div>
+
+                        <div style="margin: 1.5rem 0;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Current Phase: ${phaseNames[phase - 1] || 'Unknown'}</div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: ${progress}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="condition-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Status</div>
+                                <div class="detail-value">${status}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Filed Date</div>
+                                <div class="detail-value">${claimDate}</div>
+                            </div>
+                        </div>
+
+                        <div class="banner warning" style="margin-top: 1.5rem; padding: 1rem;">
+                            <p style="font-size: 0.9rem; margin: 0;"><strong>Clear Path Reminder:</strong> ${phase <= 3 ? 'Evidence phase - make sure you have all medical records and nexus letters ready.' : 'Decision phase - the VA is reviewing your evidence. No new evidence can be submitted now.'}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            document.getElementById('claims').innerHTML = html;
+        }
+
+        function renderAppeals(data) {
+            const appeals = data?.data || [];
+
+            if (appeals.length === 0) {
+                document.getElementById('appeals').innerHTML = `
+                    <div class="banner info">
+                        <h3>No Active Appeals</h3>
+                        <p>You currently have no appeals in progress with the VA.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="banner info">
+                    <h3>⚖️ Understanding Appeals</h3>
+                    <p><strong>Three appeal lanes:</strong> Higher-Level Review (HLR), Supplemental Claim, or Board Appeal. Each has different timelines and requirements. Choose based on whether you have NEW evidence.</p>
+                </div>
+            `;
+
+            html += '<div class="conditions-grid">';
+            appeals.forEach(appeal => {
+                const attrs = appeal.attributes || {};
+                const type = attrs.type || 'Unknown';
+                const status = attrs.status || 'Unknown';
+                const updated = attrs.updated ? new Date(attrs.updated).toLocaleDateString() : 'N/A';
+                const description = attrs.description || '';
+
+                html += `
+                    <div class="condition-card">
+                        <div class="condition-header">
+                            <div class="condition-name">${type}</div>
+                            <span class="badge badge-static">${status}</span>
+                        </div>
+
+                        ${description ? `<p style="margin: 1rem 0; color: var(--navy-deep);">${description}</p>` : ''}
+
+                        <div class="condition-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Program Area</div>
+                                <div class="detail-value">${attrs.programArea || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Last Updated</div>
+                                <div class="detail-value">${updated}</div>
+                            </div>
+                        </div>
+
+                        <div class="banner warning" style="margin-top: 1.5rem; padding: 1rem;">
+                            <p style="font-size: 0.9rem; margin: 0;"><strong>Clear Path Reminder:</strong> Appeals take time. Make sure you filed in the correct lane based on whether you have new evidence.</p>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            document.getElementById('appeals').innerHTML = html;
+        }
+
+        function renderInsights(ratingsData, claimsData) {
+            const allRatings = ratingsData?.data?.attributes?.individual_ratings || [];
+            
+            // Filter to only service-connected conditions
+            const ratings = allRatings.filter(r => r.decision === 'Service Connected');
+            
+            const combined = ratingsData?.data?.attributes?.combined_disability_rating || 0;
+            const staticCount = ratings.filter(r => r.static_ind).length;
+            const nonStaticCount = ratings.length - staticCount;
+            const activeClaims = claimsData?.data?.length || 0;
+
+            let html = `
+                <div class="banner success">
+                    <h3>🎯 Clear Path Decision Framework</h3>
+                    <p>These insights are based on YOUR actual VA data - not speculation or AI guesses. This is about understanding what you have and making informed decisions.</p>
+                </div>
+
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="insight-title">
+                            <span class="insight-icon">🔒</span>
+                            Static vs. Non-Static Breakdown
+                        </div>
+                        <div class="insight-content">
+                            <p><strong>${staticCount} Static</strong> (Permanent - Protected)</p>
+                            <p><strong>${nonStaticCount} Non-Static</strong> (Can be re-evaluated)</p>
+                            
+                            ${nonStaticCount > 0 ? `
+                                <div class="banner warning" style="margin-top: 1.5rem;">
+                                    <p><strong>Risk Assessment:</strong> ${nonStaticCount} of your conditions can be re-evaluated by the VA. This doesn't mean they WILL be reduced, but it's possible if medical evidence shows improvement.</p>
+                                </div>
+                            ` : `
+                                <div class="banner success" style="margin-top: 1.5rem;">
+                                    <p><strong>Low Risk:</strong> All your conditions are static/permanent. The VA is unlikely to reduce these unless fraud is proven.</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-title">
+                            <span class="insight-icon">📊</span>
+                            Combined Rating Analysis
+                        </div>
+                        <div class="insight-content">
+                            <p><strong>Your Combined Rating: ${combined}%</strong></p>
+                            <p style="margin-top: 1rem;">The VA uses "whole person" math - they don't just add percentages. Each additional disability is calculated against your remaining "health."</p>
+                            
+                            <div class="banner info" style="margin-top: 1.5rem;">
+                                <p><strong>Example:</strong> If you're 50% disabled, you're 50% healthy. A new 30% rating applies to that remaining 50%, giving you 50 + (30% of 50) = 65% combined.</p>
+                            </div>
+
+                            ${combined >= 90 ? `
+                                <p style="margin-top: 1rem; font-weight: 600; color: var(--green-static);">✅ You're at or near the maximum combined rating. Excellent.</p>
+                            ` : combined >= 70 ? `
+                                <p style="margin-top: 1rem; font-weight: 600; color: var(--blue-info);">💡 You're in the 70-90% range. Any increases would need to show significant worsening.</p>
+                            ` : `
+                                <p style="margin-top: 1rem; font-weight: 600; color: var(--orange-pending);">⚠️ Under 70%. If conditions have worsened, consider filing for increases - but only with medical evidence.</p>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-title">
+                            <span class="insight-icon">🎯</span>
+                            Decision Timing Window
+                        </div>
+                        <div class="insight-content">
+                            <p><strong>Before You File Anything:</strong></p>
+                            <ul class="insight-list">
+                                <li>Do you have CURRENT medical evidence of worsening?</li>
+                                <li>Have you been formally diagnosed with any new conditions?</li>
+                                <li>Do you have a nexus letter linking conditions to service?</li>
+                                <li>Are you prepared to wait 6-12 months for a decision?</li>
+                            </ul>
+
+                            <div class="banner warning" style="margin-top: 1.5rem;">
+                                <p><strong>Clear Path Philosophy:</strong> Filing without evidence doesn't help - it just restarts the clock. Get diagnosed. Get evidence. THEN file.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-title">
+                            <span class="insight-icon">📋</span>
+                            Assumption Kill List
+                        </div>
+                        <div class="insight-content">
+                            <p><strong>Verify These Before Filing:</strong></p>
+                            <ul class="insight-list">
+                                <li><strong>Assumption:</strong> "My condition got worse" → <strong>Reality Check:</strong> Do you have medical records documenting this?</li>
+                                <li><strong>Assumption:</strong> "I deserve a higher rating" → <strong>Reality Check:</strong> Does your current severity match the VA's rating criteria?</li>
+                                <li><strong>Assumption:</strong> "The VA will find my evidence" → <strong>Reality Check:</strong> You must submit ALL evidence yourself.</li>
+                                <li><strong>Assumption:</strong> "This will be quick" → <strong>Reality Check:</strong> Average claim takes 6-12 months.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-title">
+                            <span class="insight-icon">⚠️</span>
+                            What Could Trigger Re-Evaluation
+                        </div>
+                        <div class="insight-content">
+                            <p><strong>Actions That May Trigger Review:</strong></p>
+                            <ul class="insight-list">
+                                <li>Filing for an increase on a non-static condition</li>
+                                <li>Claiming improvement in a statement (be careful what you write)</li>
+                                <li>Routine scheduled re-exams (for non-static conditions)</li>
+                                <li>Filing secondary conditions that contradict primary severity</li>
+                            </ul>
+
+                            <div class="banner warning" style="margin-top: 1.5rem;">
+                                <p><strong>Protection Strategy:</strong> If a condition is static, think carefully before filing for an increase. You could risk triggering review of a protected rating.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-title">
+                            <span class="insight-icon">🧭</span>
+                            Your Next Steps
+                        </div>
+                        <div class="insight-content">
+                            ${activeClaims > 0 ? `
+                                <p><strong>You have ${activeClaims} active claim${activeClaims > 1 ? 's' : ''}.</strong></p>
+                                <p>Focus on supporting those claims with evidence. Don't file new claims until current ones are resolved unless you have strong medical documentation.</p>
+                            ` : `
+                                <p><strong>No active claims.</strong></p>
+                                <p>If any conditions have worsened or you've developed new service-connected conditions:</p>
+                                <ol style="margin-top: 1rem; padding-left: 1.5rem;">
+                                    <li>Get formally diagnosed by a doctor</li>
+                                    <li>Obtain medical records documenting severity</li>
+                                    <li>Get a nexus letter (if filing new condition)</li>
+                                    <li>THEN file your claim with all evidence attached</li>
+                                </ol>
+                            `}
+
+                            <div class="banner info" style="margin-top: 1.5rem;">
+                                <p><strong>Remember:</strong> Slow down. Verify. File with evidence. That's the Clear Path way.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('insights').innerHTML = html;
         }
 
         function showNoData() {
-            const statusMessage = document.getElementById('statusMessage');
-            const navButtons = document.getElementById('navButtons');
-            const noDataMessage = document.getElementById('noDataMessage');
-
-            statusMessage.innerHTML = `
-                <div class="error">
-                    <strong>❌ No Data Found</strong>
-                    <br><br>Please use the Chrome extension to load your VA data first.
+            document.querySelector('.stats-grid').innerHTML = `
+                <div class="banner warning" style="grid-column: 1 / -1;">
+                    <h3>No Data Found</h3>
+                    <p>Please use the Clear Path VA Chrome Extension to load your VA data first.</p>
                 </div>
             `;
-            navButtons.style.display = 'none';
-            noDataMessage.style.display = 'block';
+
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.innerHTML = `
+                    <div class="banner warning">
+                        <h3>No Data Available</h3>
+                        <p>Please load your VA data using the Chrome extension.</p>
+                    </div>
+                `;
+            });
         }
     </script>
 </body>
